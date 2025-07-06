@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
-import { HashRouter, Routes, Route } from 'react-router-dom';
 import './App.css';
 
-function TherapyForm() {
+function App() {
   const [step, setStep] = useState(1);
   const [country, setCountry] = useState('');
   const [gender, setGender] = useState('');
@@ -25,50 +24,53 @@ function TherapyForm() {
   };
 
   const handleSubmit = async (e) => {
-    e?.preventDefault();
-    setIsSubmitting(true);
-    setSubmitError(null);
+  e?.preventDefault();
+  setIsSubmitting(true);
+  setSubmitError(null);
 
-    const scriptUrl = "https://script.google.com/macros/s/AKfycbzLXGtJaKm9yLtm6vAlG7njtJDdDrjM1PUQJz3U_FyfeflEaUR73CR7I6nQH-FAAzD8zw/exec";
+  // Use the correct URL (make sure to deploy your script first)
+  const scriptUrl = "https://script.google.com/macros/s/AKfycbzLXGtJaKm9yLtm6vAlG7njtJDdDrjM1PUQJz3U_FyfeflEaUR73CR7I6nQH-FAAzD8zw/exec";
 
-    const formData = {
-      Name: 'Therapy User',
-      Email: 'user@example.com',
-      Country: country,
-      Gender: gender,
-      Age: age
-    };
-
-    try {
-      await fetch(`${scriptUrl}?auth=true`, { 
-        method: 'GET',
-        redirect: 'follow'
-      });
-
-      const response = await fetch(scriptUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-        redirect: 'follow'
-      });
-
-      const result = await response.json();
-      
-      if (result.status === 'success') {
-        setSubmitSuccess(true);
-        setTimeout(resetForm, 2000);
-      } else {
-        throw new Error(result.message || 'Submission failed');
-      }
-    } catch (error) {
-      console.error('Submission error:', error);
-      setSubmitError(error.message || 'Failed to submit form. Please try again.');
-    } finally {
-      setIsSubmitting(false);
-    }
+  const formData = {
+    Name: 'Therapy User',
+    Email: 'user@example.com',
+    Country: country,
+    Gender: gender,
+    Age: age
   };
+
+  try {
+    // First make a GET request to trigger authorization if needed
+    await fetch(`${scriptUrl}?auth=true`, { 
+      method: 'GET',
+      redirect: 'follow'
+    });
+
+    // Then make the POST request
+    const response = await fetch(scriptUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(formData),
+      redirect: 'follow'
+    });
+
+    const result = await response.json();
+    
+    if (result.status === 'success') {
+      setSubmitSuccess(true);
+      setTimeout(resetForm, 2000);
+    } else {
+      throw new Error(result.message || 'Submission failed');
+    }
+  } catch (error) {
+    console.error('Submission error:', error);
+    setSubmitError(error.message || 'Failed to submit form. Please try again.');
+  } finally {
+    setIsSubmitting(false);
+  }
+};
 
   const resetForm = () => {
     setStep(1);
@@ -240,17 +242,6 @@ function TherapyForm() {
         )}
       </div>
     </div>
-  );
-}
-
-function App() {
-  return (
-    <HashRouter>
-      <Routes>
-        <Route path="/" element={<TherapyForm />} />
-        {/* Add more routes if needed */}
-      </Routes>
-    </HashRouter>
   );
 }
 
