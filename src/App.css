@@ -51,7 +51,6 @@ body {
   width: 100%;
   margin-bottom: 30px;
   gap: 5px;
-  max-width: 150px;
 }
 
 .progress-bar {
@@ -71,7 +70,6 @@ body {
   text-align: center;
   margin-bottom: 30px;
   width: 100%;
-  max-width: 500px;
 }
 
 .header h1 {
@@ -95,7 +93,6 @@ body {
 
 .card {
   width: 100%;
-  max-width: 500px;
   background: var(--white);
   border-radius: var(--radius);
   box-shadow: var(--shadow);
@@ -126,7 +123,6 @@ body {
 /* ===== FORM CONTROLS ===== */
 .input-container {
   width: 100%;
-  max-width: 400px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -158,7 +154,6 @@ body {
   background-color: var(--white);
   color: var(--text-dark);
   cursor: pointer;
-  text-align: center;
   transition: var(--transition);
 }
 
@@ -168,22 +163,21 @@ body {
   box-shadow: 0 0 0 3px var(--primary-light);
 }
 
-/* ===== GENDER BUTTONS ===== */
-.gender-buttons-container {
+/* ===== OPTION BUTTONS ===== */
+.buttons-container {
   width: 100%;
   display: flex;
   justify-content: center;
 }
 
-.gender-buttons-group {
+.buttons-group {
   display: flex;
   flex-direction: column;
   gap: 12px;
   width: 100%;
-  max-width: 300px;
 }
 
-.gender-button {
+.option-button {
   padding: 14px;
   border: 1px solid var(--border);
   border-radius: var(--radius);
@@ -195,12 +189,12 @@ body {
   text-align: center;
 }
 
-.gender-button:hover {
+.option-button:hover {
   background: #f5f5f5;
   border-color: var(--border-hover);
 }
 
-.gender-button.selected {
+.option-button.selected {
   background: var(--primary);
   color: var(--white);
   border-color: var(--primary);
@@ -212,21 +206,38 @@ body {
   display: flex;
   justify-content: center;
   position: relative;
+  gap: 15px;
 }
 
-.next-button, .submit-button {
+.dual-buttons {
+  justify-content: space-between;
+}
+
+.previous-button, .next-button, .submit-button {
   padding: 14px 30px;
-  background: var(--primary);
-  color: var(--white);
   border: none;
   border-radius: var(--radius);
   font-size: 16px;
   cursor: pointer;
   transition: var(--transition);
   font-weight: 500;
-  min-width: 150px;
+  min-width: 120px;
   position: relative;
   overflow: hidden;
+}
+
+.previous-button {
+  background: #f0f0f0;
+  color: var(--text-dark);
+}
+
+.previous-button:hover {
+  background: #e0e0e0;
+}
+
+.next-button, .submit-button {
+  background: var(--primary);
+  color: var(--white);
 }
 
 .next-button:hover, .submit-button:hover {
@@ -277,42 +288,6 @@ body {
   width: 100%;
 }
 
-.success-message {
-  color: var(--primary);
-  font-size: 16px;
-  text-align: center;
-  margin-top: 20px;
-  padding: 12px;
-  background-color: var(--primary-light);
-  border-radius: var(--radius);
-  animation: fadeIn 0.5s ease;
-}
-
-/* ===== SUBMISSION CONFIRMATION ===== */
-.submission-confirmation {
-  text-align: center;
-  padding: 30px;
-  animation: fadeIn 0.6s ease;
-}
-
-.submission-confirmation h2 {
-  color: var(--primary);
-  margin-bottom: 15px;
-  font-size: 22px;
-}
-
-.submission-confirmation p {
-  color: var(--text-medium);
-  margin-bottom: 25px;
-}
-
-.submission-confirmation .icon-success {
-  font-size: 48px;
-  color: var(--primary);
-  margin-bottom: 20px;
-  animation: bounceIn 0.6s ease;
-}
-
 /* ===== ANIMATIONS ===== */
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(10px); }
@@ -323,32 +298,10 @@ body {
   to { transform: translate(-50%, -50%) rotate(360deg); }
 }
 
-@keyframes bounceIn {
-  0% { transform: scale(0.5); opacity: 0; }
-  50% { transform: scale(1.1); opacity: 1; }
-  100% { transform: scale(1); }
-}
-
-@keyframes ripple {
-  0% {
-    transform: scale(0);
-    opacity: 0.5;
-  }
-  100% {
-    transform: scale(20);
-    opacity: 0;
-  }
-}
-
 /* ===== RESPONSIVE DESIGN ===== */
-@media (max-width: 480px) {
-  body {
-    padding: 15px;
-    align-items: flex-start;
-  }
-  
+@media (max-width: 768px) {
   .card {
-    padding: 20px;
+    padding: 25px;
   }
   
   .header h1 {
@@ -363,25 +316,57 @@ body {
     font-size: 18px;
   }
   
-  .gender-button, .dropdown, .next-button, .submit-button {
+  .option-button, .dropdown, .previous-button, .next-button, .submit-button {
     padding: 12px;
     font-size: 15px;
   }
   
-  .gender-buttons-group {
+  .buttons-group {
     gap: 10px;
   }
   
-  .error-message, .success-message {
+  .error-message {
     font-size: 13px;
   }
+}
+
+@media (max-width: 480px) {
+  body {
+    padding: 15px;
+    align-items: flex-start;
+  }
   
-  .submission-confirmation {
+  .card {
     padding: 20px;
   }
   
-  .submission-confirmation h2 {
+  .header h1 {
     font-size: 20px;
+  }
+  
+  .subheading {
+    font-size: 14px;
+  }
+  
+  .card-content h2 {
+    font-size: 17px;
+  }
+  
+  .option-button, .dropdown {
+    padding: 10px 12px;
+    font-size: 14px;
+  }
+  
+  .previous-button, .next-button, .submit-button {
+    padding: 10px 15px;
+    font-size: 14px;
+    min-width: 100px;
+  flex: 1;
+  text-align: center;
+  }
+  
+  .button-container {
+    gap: 10px;
   }
 }
 

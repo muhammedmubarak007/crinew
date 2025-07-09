@@ -1,245 +1,254 @@
 import React, { useState } from 'react';
 import './App.css';
 
+const QUESTIONS = [
+  {
+    id: 1,
+    question: "Which country are you in?",
+    type: "dropdown",
+    options: ['United States', 'Canada', 'United Kingdom', 'Australia', 'India', 'Other'],
+    field: 'country'
+  },
+  {
+    id: 2,
+    question: "What is your gender identity?",
+    type: "buttons",
+    options: ['Male', 'Female', 'Non-binary', 'Prefer not to say'],
+    field: 'gender'
+  },
+  {
+    id: 3,
+    question: "How old are you?",
+    type: "dropdown",
+    options: ['Under 18', '18-24', '25-34', '35-44', '45-54', '55-64', '65+'],
+    field: 'age'
+  },
+  {
+    id: 4,
+    question: "What is your primary concern?",
+    type: "buttons",
+    options: ['Anxiety', 'Depression', 'Relationship issues', 'Trauma', 'Stress', 'Other'],
+    field: 'concern'
+  },
+  {
+    id: 5,
+    question: "How long have you been experiencing this?",
+    type: "dropdown",
+    options: ['Less than a month', '1-6 months', '6-12 months', '1-2 years', 'More than 2 years'],
+    field: 'duration'
+  },
+  {
+    id: 6,
+    question: "Have you had therapy before?",
+    type: "buttons",
+    options: ['Yes', 'No'],
+    field: 'therapyBefore'
+  },
+  {
+    id: 7,
+    question: "What type of therapist would you prefer?",
+    type: "buttons",
+    options: ['Male', 'Female', 'No preference'],
+    field: 'therapistPreference'
+  },
+  {
+    id: 8,
+    question: "What is your preferred session frequency?",
+    type: "dropdown",
+    options: ['Once a week', 'Twice a week', 'Once every 2 weeks', 'Once a month'],
+    field: 'frequency'
+  },
+  {
+    id: 9,
+    question: "What time of day works best for you?",
+    type: "buttons",
+    options: ['Morning', 'Afternoon', 'Evening', 'No preference'],
+    field: 'timePreference'
+  },
+  {
+    id: 10,
+    question: "How would you prefer to communicate?",
+    type: "buttons",
+    options: ['Video call', 'Phone call', 'Text chat', 'In-person'],
+    field: 'communicationPreference'
+  }
+];
+
 function App() {
-  const [step, setStep] = useState(1);
-  const [country, setCountry] = useState('');
-  const [gender, setGender] = useState('');
-  const [age, setAge] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitError, setSubmitError] = useState(null);
-  const [submitSuccess, setSubmitSuccess] = useState(false);
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [formData, setFormData] = useState(
+    QUESTIONS.reduce((acc, question) => {
+      acc[question.field] = '';
+      return acc;
+    }, {})
+  );
+  const [submissionState, setSubmissionState] = useState({
+    isSubmitting: false,
+    error: null
+  });
 
-  const countries = ['United States', 'Canada', 'United Kingdom', 'Australia', 'India', 'Other'];
-  const ageGroups = ['Under 18', '18-24', '25-34', '35-44', '45-54', '55-64', '65+'];
+  const currentQuestion = QUESTIONS[currentQuestionIndex];
 
-  const handleNext = () => {
-    setStep(step + 1);
-    setSubmitError(null);
+  const handleInputChange = (field, value) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const handlePrevious = () => {
-    setStep(step - 1);
-    setSubmitError(null);
+  const navigateQuestion = (direction) => {
+    if (direction === 'next' && currentQuestionIndex < QUESTIONS.length - 1) {
+      setCurrentQuestionIndex(currentQuestionIndex + 1);
+    } else if (direction === 'previous' && currentQuestionIndex > 0) {
+      setCurrentQuestionIndex(currentQuestionIndex - 1);
+    }
   };
 
   const handleSubmit = async (e) => {
-  e?.preventDefault();
-  setIsSubmitting(true);
-  setSubmitError(null);
+    e.preventDefault();
+    setSubmissionState({ isSubmitting: true, error: null });
 
-  // Use the correct URL (make sure to deploy your script first)
-  const scriptUrl = "https://script.google.com/macros/s/AKfycbzLXGtJaKm9yLtm6vAlG7njtJDdDrjM1PUQJz3U_FyfeflEaUR73CR7I6nQH-FAAzD8zw/exec";
+    const url = "https://script.google.com/macros/s/AKfycby0gKwTDx2Sr0gyfZQ8A5K5KhEEFXJk6bzItuVejPg1OvQKl_8kN9svzFgmp9YmBtXphQ/exec";
 
-  const formData = {
-    Name: 'Therapy User',
-    Email: 'user@example.com',
-    Country: country,
-    Gender: gender,
-    Age: age
+    try {
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded"
+        },
+        body: new URLSearchParams({
+          Country: formData.country,
+          Gender: formData.gender,
+          Age: formData.age,
+          Concern: formData.concern,
+          Duration: formData.duration,
+          TherapyBefore: formData.therapyBefore,
+          TherapistPreference: formData.therapistPreference,
+          Frequency: formData.frequency,
+          TimePreference: formData.timePreference,
+          CommunicationPreference: formData.communicationPreference
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+
+      const result = await response.json();
+
+      if (result.status === "success") {
+        // Redirect to another website after successful submission
+        window.location.href = "https://www.crink.app/"; // Replace with your actual URL
+      } else {
+        throw new Error(result.message || "Submission failed");
+      }
+    } catch (error) {
+      console.error("Submission error:", error);
+      setSubmissionState({ 
+        isSubmitting: false, 
+        error: error.message || "Failed to submit form"
+      });
+    }
   };
 
-  try {
-    // First make a GET request to trigger authorization if needed
-    await fetch(`${scriptUrl}?auth=true`, { 
-      method: 'GET',
-      redirect: 'follow'
-    });
-
-    // Then make the POST request
-    const response = await fetch(scriptUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(formData),
-      redirect: 'follow'
-    });
-
-    const result = await response.json();
-    
-    if (result.status === 'success') {
-      setSubmitSuccess(true);
-      setTimeout(resetForm, 2000);
-    } else {
-      throw new Error(result.message || 'Submission failed');
+  const renderQuestion = () => {
+    switch (currentQuestion.type) {
+      case "dropdown":
+        return (
+          <div className="input-container">
+            <div className="select-wrapper">
+              <select
+                value={formData[currentQuestion.field]}
+                onChange={(e) => handleInputChange(currentQuestion.field, e.target.value)}
+                className="dropdown"
+              >
+                <option value="">Select an option</option>
+                {currentQuestion.options.map(option => (
+                  <option key={option} value={option}>{option}</option>
+                ))}
+              </select>
+              <span className="dropdown-arrow">▼</span>
+            </div>
+          </div>
+        );
+      case "buttons":
+        return (
+          <div className="buttons-container">
+            <div className="buttons-group">
+              {currentQuestion.options.map(option => (
+                <button
+                  key={option}
+                  type="button"
+                  className={`option-button ${formData[currentQuestion.field] === option ? 'selected' : ''}`}
+                  onClick={() => handleInputChange(currentQuestion.field, option)}
+                >
+                  {option}
+                </button>
+              ))}
+            </div>
+          </div>
+        );
+      default:
+        return null;
     }
-  } catch (error) {
-    console.error('Submission error:', error);
-    setSubmitError(error.message || 'Failed to submit form. Please try again.');
-  } finally {
-    setIsSubmitting(false);
-  }
-};
-
-  const resetForm = () => {
-    setStep(1);
-    setCountry('');
-    setGender('');
-    setAge('');
-    setSubmitSuccess(false);
-    setSubmitError(null);
   };
 
   return (
     <div className="app">
       <div className="progress-indicator">
-        <div className={`progress-bar ${step >= 1 ? 'active' : ''}`}></div>
-        <div className={`progress-bar ${step >= 2 ? 'active' : ''}`}></div>
-        <div className={`progress-bar ${step >= 3 ? 'active' : ''}`}></div>
+        {QUESTIONS.map((_, index) => (
+          <div
+            key={index}
+            className={`progress-bar ${currentQuestionIndex >= index ? 'active' : ''}`}
+          />
+        ))}
       </div>
 
       <header className="header">
         <h1>Help us match you to the right therapist</h1>
         <p className="subheading">
-          It's important to have a therapist who you can establish a personal connection with. 
-          The following questions are designed to match you to a licensed therapist based on 
+          It's important to have a therapist who you can establish a personal connection with.
+          The following questions are designed to match you to a licensed therapist based on
           your therapy needs and personal preferences.
         </p>
       </header>
 
       <div className="card-container">
-        {submitSuccess ? (
-          <div className="card">
-            <div className="card-content submission-success">
-              <div className="success-icon">✓</div>
-              <h2>Thank You!</h2>
-              <p>Your information has been submitted successfully.</p>
-              <p>We'll match you with a therapist soon.</p>
-              <button 
-                onClick={resetForm}
-                className="submit-button"
-              >
-                Start New Submission
-              </button>
+        <div className="card">
+          <div className="card-content">
+            <h2>{currentQuestion.question}</h2>
+            {renderQuestion()}
+            {submissionState.error && (
+              <div className="error-message">{submissionState.error}</div>
+            )}
+            <div className="button-container dual-buttons">
+              {currentQuestionIndex > 0 && (
+                <button
+                  onClick={() => navigateQuestion('previous')}
+                  className="previous-button"
+                  type="button"
+                >
+                  Back
+                </button>
+              )}
+              {currentQuestionIndex < QUESTIONS.length - 1 ? (
+                <button
+                  onClick={() => navigateQuestion('next')}
+                  disabled={!formData[currentQuestion.field]}
+                  className="next-button"
+                  type="button"
+                >
+                  Next
+                </button>
+              ) : (
+                <button
+                  onClick={handleSubmit}
+                  disabled={!formData[currentQuestion.field] || submissionState.isSubmitting}
+                  className="submit-button"
+                >
+                  {submissionState.isSubmitting ? 'Submitting...' : 'Submit'}
+                </button>
+              )}
             </div>
           </div>
-        ) : (
-          <div className="card">
-            {step === 1 && (
-              <div className="card-content">
-                <h2>Which country are you in?</h2>
-                <div className="input-container">
-                  <div className="select-wrapper">
-                    <select 
-                      value={country} 
-                      onChange={(e) => setCountry(e.target.value)}
-                      className="dropdown"
-                    >
-                      <option value="">Select your country</option>
-                      {countries.map((c) => (
-                        <option key={c} value={c}>{c}</option>
-                      ))}
-                    </select>
-                    <span className="dropdown-arrow">▼</span>
-                  </div>
-                </div>
-                <div className="button-container">
-                  <button 
-                    onClick={handleNext} 
-                    disabled={!country}
-                    className="next-button"
-                  >
-                    Next
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {step === 2 && (
-              <div className="card-content">
-                <h2>What is your gender identity?</h2>
-                <div className="gender-buttons-container">
-                  <div className="gender-buttons-group">
-                    <button 
-                      className={`gender-button ${gender === 'Male' ? 'selected' : ''}`}
-                      onClick={() => setGender('Male')}
-                    >
-                      Male
-                    </button>
-                    <button 
-                      className={`gender-button ${gender === 'Female' ? 'selected' : ''}`}
-                      onClick={() => setGender('Female')}
-                    >
-                      Female
-                    </button>
-                    <button 
-                      className={`gender-button ${gender === 'Non-binary' ? 'selected' : ''}`}
-                      onClick={() => setGender('Non-binary')}
-                    >
-                      Non-binary
-                    </button>
-                    <button 
-                      className={`gender-button ${gender === 'Prefer not to say' ? 'selected' : ''}`}
-                      onClick={() => setGender('Prefer not to say')}
-                    >
-                      Prefer not to say
-                    </button>
-                  </div>
-                </div>
-                <div className="button-container dual-buttons">
-                  <button 
-                    onClick={handlePrevious}
-                    className="previous-button"
-                  >
-                    Back
-                  </button>
-                  <button 
-                    onClick={handleNext} 
-                    disabled={!gender}
-                    className="next-button"
-                  >
-                    Next
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {step === 3 && (
-              <div className="card-content">
-                <h2>How old are you?</h2>
-                <div className="input-container">
-                  <div className="select-wrapper">
-                    <select 
-                      value={age} 
-                      onChange={(e) => setAge(e.target.value)}
-                      className="dropdown"
-                    >
-                      <option value="">Select your age group</option>
-                      {ageGroups.map((a) => (
-                        <option key={a} value={a}>{a}</option>
-                      ))}
-                    </select>
-                    <span className="dropdown-arrow">▼</span>
-                  </div>
-                </div>
-                <div className="button-container dual-buttons">
-                  <button 
-                    onClick={handlePrevious}
-                    className="previous-button"
-                  >
-                    Back
-                  </button>
-                  <button 
-                    onClick={handleSubmit} 
-                    disabled={!age || isSubmitting}
-                    className={`submit-button ${isSubmitting ? 'loading' : ''}`}
-                  >
-                    {isSubmitting ? (
-                      <>
-                        <span className="spinner"></span>
-                        Submitting...
-                      </>
-                    ) : (
-                      'Submit'
-                    )}
-                  </button>
-                </div>
-                {submitError && <p className="error-message">{submitError}</p>}
-              </div>
-            )}
-          </div>
-        )}
+        </div>
       </div>
     </div>
   );
