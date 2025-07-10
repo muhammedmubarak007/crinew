@@ -133,10 +133,10 @@ function App() {
 
       const result = await response.json();
 
-      if (result.status === "success") {
-        // Redirect to another website after successful submission
-        window.location.href = "https://www.crink.app/"; // Replace with your actual URL
-      } else {
+    if (result.status === "success") {
+  window.open("https://www.crink.app/book-therapy", "_blank");
+}
+ else {
         throw new Error(result.message || "Submission failed");
       }
     } catch (error) {
