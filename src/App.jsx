@@ -3,74 +3,44 @@ import './App.css';
 
 const QUESTIONS = [
   {
+    id: 0,
+    question: "What is your name?",
+    type: "text1",
+    field: "name"
+  },
+  {
     id: 1,
-    question: "Which country are you in?",
-    type: "dropdown",
-    options: ['United States', 'Canada', 'United Kingdom', 'Australia', 'India', 'Other'],
-    field: 'country'
+    question: "How old are you?",
+    type: "text2",
+    field: "age"
   },
   {
     id: 2,
-    question: "What is your gender identity?",
+    question: "What is your gender?",
     type: "buttons",
-    options: ['Male', 'Female', 'Non-binary', 'Prefer not to say'],
-    field: 'gender'
+    options: ["Male", "Female", "Other"],
+    field: "gender"
   },
   {
     id: 3,
-    question: "How old are you?",
-    type: "dropdown",
-    options: ['Under 18', '18-24', '25-34', '35-44', '45-54', '55-64', '65+'],
-    field: 'age'
+    question: "I often question whether I have the skills to be a good parent.",
+    type: "buttons",
+    options: ['Strongly Disagree', 'Disagree', 'Neutral', 'Agree', 'Strongly Agree'],
+    field: "q1"
   },
   {
     id: 4,
-    question: "What is your primary concern?",
+    question: "I struggle to solve problems that come up in my job.",
     type: "buttons",
-    options: ['Anxiety', 'Depression', 'Relationship issues', 'Trauma', 'Stress', 'Other'],
-    field: 'concern'
+    options: ['Strongly Disagree', 'Disagree', 'Neutral', 'Agree', 'Strongly Agree'],
+    field: "q2"
   },
   {
     id: 5,
-    question: "How long have you been experiencing this?",
-    type: "dropdown",
-    options: ['Less than a month', '1-6 months', '6-12 months', '1-2 years', 'More than 2 years'],
-    field: 'duration'
-  },
-  {
-    id: 6,
-    question: "Have you had therapy before?",
+    question: "I find it difficult to work well as part of a team.",
     type: "buttons",
-    options: ['Yes', 'No'],
-    field: 'therapyBefore'
-  },
-  {
-    id: 7,
-    question: "What type of therapist would you prefer?",
-    type: "buttons",
-    options: ['Male', 'Female', 'No preference'],
-    field: 'therapistPreference'
-  },
-  {
-    id: 8,
-    question: "What is your preferred session frequency?",
-    type: "dropdown",
-    options: ['Once a week', 'Twice a week', 'Once every 2 weeks', 'Once a month'],
-    field: 'frequency'
-  },
-  {
-    id: 9,
-    question: "What time of day works best for you?",
-    type: "buttons",
-    options: ['Morning', 'Afternoon', 'Evening', 'No preference'],
-    field: 'timePreference'
-  },
-  {
-    id: 10,
-    question: "How would you prefer to communicate?",
-    type: "buttons",
-    options: ['Video call', 'Phone call', 'Text chat', 'In-person'],
-    field: 'communicationPreference'
+    options: ['Strongly Disagree', 'Disagree', 'Neutral', 'Agree', 'Strongly Agree'],
+    field: "q3"
   }
 ];
 
@@ -105,7 +75,7 @@ function App() {
     e.preventDefault();
     setSubmissionState({ isSubmitting: true, error: null });
 
-    const url = "https://script.google.com/macros/s/AKfycby0gKwTDx2Sr0gyfZQ8A5K5KhEEFXJk6bzItuVejPg1OvQKl_8kN9svzFgmp9YmBtXphQ/exec";
+    const url = "https://script.google.com/macros/s/AKfycbxQUCpr-O3Z0t4nS5NTW4v2_LdIDSjZWx51-Esl93yr9hvO8HxmfJADjMQqUkc6i7w3nQ/exec";
 
     try {
       const response = await fetch(url, {
@@ -114,16 +84,12 @@ function App() {
           "Content-Type": "application/x-www-form-urlencoded"
         },
         body: new URLSearchParams({
-          Country: formData.country,
-          Gender: formData.gender,
+          Name: formData.name,
           Age: formData.age,
-          Concern: formData.concern,
-          Duration: formData.duration,
-          TherapyBefore: formData.therapyBefore,
-          TherapistPreference: formData.therapistPreference,
-          Frequency: formData.frequency,
-          TimePreference: formData.timePreference,
-          CommunicationPreference: formData.communicationPreference
+          Gender: formData.gender,
+          Question1: formData.q1,
+          Question2: formData.q2,
+          Question3: formData.q3
         })
       });
 
@@ -133,16 +99,26 @@ function App() {
 
       const result = await response.json();
 
-    if (result.status === "success") {
-  window.open("https://www.crink.app/book-therapy", "_blank");
-}
- else {
+      if (result.status === "success") {
+        window.open("https://www.crink.app/book-therapy", "_blank");
+     
+  // Reset form
+  setFormData(
+    QUESTIONS.reduce((acc, question) => {
+      acc[question.field] = '';
+      return acc;
+    }, {})
+  );
+  setCurrentQuestionIndex(0);
+  setSubmissionState({ isSubmitting: false, error: null });
+     
+      } else {
         throw new Error(result.message || "Submission failed");
       }
     } catch (error) {
       console.error("Submission error:", error);
-      setSubmissionState({ 
-        isSubmitting: false, 
+      setSubmissionState({
+        isSubmitting: false,
         error: error.message || "Failed to submit form"
       });
     }
@@ -150,22 +126,28 @@ function App() {
 
   const renderQuestion = () => {
     switch (currentQuestion.type) {
-      case "dropdown":
+      case "text1":
         return (
           <div className="input-container">
-            <div className="select-wrapper">
-              <select
-                value={formData[currentQuestion.field]}
-                onChange={(e) => handleInputChange(currentQuestion.field, e.target.value)}
-                className="dropdown"
-              >
-                <option value="">Select an option</option>
-                {currentQuestion.options.map(option => (
-                  <option key={option} value={option}>{option}</option>
-                ))}
-              </select>
-              <span className="dropdown-arrow">▼</span>
-            </div>
+            <input
+              type="text"
+              className="text-input"
+              value={formData[currentQuestion.field]}
+              onChange={(e) => handleInputChange(currentQuestion.field, e.target.value)}
+              placeholder="Type your answer"
+            />
+          </div>
+        );
+         case "text2":
+        return (
+          <div className="input-container">
+            <input
+              type="number"
+              className="text-input"
+              value={formData[currentQuestion.field]}
+              onChange={(e) => handleInputChange(currentQuestion.field, e.target.value)}
+              placeholder="Type your answer"
+            />
           </div>
         );
       case "buttons":
